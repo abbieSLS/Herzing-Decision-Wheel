@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decision-Making Wheel Activity</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #003366;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .scenario-box {
+            background: #e8f4f8;
+            border-left: 4px solid #0066cc;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+        
+        .scenario-box h2 {
+            color: #003366;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .scenario-box p {
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .wheel-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 40px 0;
+        }
+        
+        .wheel-wrapper {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin-bottom: 30px;
+        }
+        
+        #wheelCanvas {
+            width: 100%;
+            height: 100%;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            filter: drop-shadow(0 5px 20px rgba(0,0,0,0.2));
+        }
+        
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #003366;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 10;
+            font-size: 16px;
+        }
+        
+        .pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 25px solid #d4af37;
+            z-index: 20;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+        
+        .spin-button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .spin-button:hover {
+            background: #0052a3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        .spin-button:active {
+            transform: translateY(0);
+        }
+        
+        .spin-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result-box {
+            background: #f8f9fa;
+            border: 2px solid #0066cc;
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 30px;
+            min-height: 150px;
+            display: none;
+        }
+        
+        .result-box.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .result-box h3 {
+            color: #003366;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+        
+        .result-box p {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .prompt-text {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 4px solid #d4af37;
+            font-style: italic;
+            color: #222;
+            font-size: 17px;
+            line-height: 1.6;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .instructions {
+            background: #fff9e6;
+            border: 1px solid #d4af37;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+        }
+        
+        .instructions h3 {
+            color: #003366;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            color: #333;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .wheel-wrapper {
+                width: 300px;
+                height: 300px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Decision-Making Wheel Activity</h1>
+        <p class="subtitle">Exploring the Problem-Solving Framework</p>
+        
+        <div class="scenario-box">
+            <h2>The Scenario</h2>
+            <p>Two faculty members in the same department are not getting along. Their conflict is beginning to affect department meetings and collaborative projects.</p>
+        </div>
+        
+        <div class="instructions">
+            <h3>How This Activity Works</h3>
+            <ol>
+                <li>Click the "Spin the Wheel" button below</li>
+                <li>The wheel will land on one section of the decision-making framework</li>
+                <li>Consider the prompt that appears: How might you apply this particular approach to the faculty conflict?</li>
+                <li>Take 1-2 minutes to brainstorm or discuss your ideas</li>
+                <li>Spin again to explore a different perspective (try 3-4 sections total)</li>
+            </ol>
+        </div>
+        
+        <div class="wheel-container">
+            <div class="wheel-wrapper">
+                <div class="pointer"></div>
+                <canvas id="wheelCanvas" width="800" height="800"></canvas>
+                <div class="wheel-center">Issue</div>
+            </div>
+            
+            <button class="spin-button" id="spinButton" onclick="spinWheel()">Spin the Wheel</button>
+        </div>
+        
+        <div class="result-box" id="resultBox">
+            <h3 id="resultTitle">Section Name</h3>
+            <p id="resultDescription">Description will appear here</p>
+            <div class="prompt-text" id="resultPrompt">Prompt will appear here</div>
+        </div>
+    </div>
+    
+    <script>
+        const sections = [
+            {
+                name: "Gather Facts",
+                description: "This section focuses on collecting objective information and data about the situation.",
+                prompt: "What specific, factual information would you need to gather about this conflict? Consider: How long has this been going on? What observable behaviors have occurred? What documentation exists?",
+                color: "#b3d9d9"
+            },
+            {
+                name: "Analyze Facts",
+                description: "This section involves examining the information you've gathered and identifying possible alternatives or interpretations.",
+                prompt: "If you were to analyze this situation, what different explanations might exist for why these faculty members aren't getting along? What patterns or underlying issues might you identify?",
+                color: "#b3d1e6"
+            },
+            {
+                name: "Emotions",
+                description: "This section asks you to acknowledge and consider your own emotional response to the situation.",
+                prompt: "If you were dealing with this conflict, what emotions might you be experiencing? How might your feelings influence your approach to resolving this issue?",
+                color: "#ffb3ba"
+            },
+            {
+                name: "Stakeholders",
+                description: "This section identifies all the people or groups who have a stake in the outcome of this issue.",
+                prompt: "Who are all the stakeholders affected by this faculty conflict? Consider: Who are the direct parties? Who else is impacted? What might each stakeholder want or need from a resolution?",
+                color: "#ffd9b3"
+            },
+            {
+                name: "Select Actions",
+                description: "This section focuses on choosing and implementing both current and future actions to address the issue.",
+                prompt: "What specific actions could you take to address this conflict? Think about both immediate steps and longer-term strategies. What would you do first, and what might come next?",
+                color: "#d9b3d9"
+            },
+            {
+                name: "Issue Definition",
+                description: "This section is about clearly articulating what the core problem actually is.",
+                prompt: "How would you define the central issue here? Is it simply that 'two faculty members don't get along,' or is there a deeper problem? Try writing a clear problem statement.",
+                color: "#e6e6b3"
+            }
+        ];
+        
+        let isSpinning = false;
+        let currentRotation = 0;
+        
+        // Draw the wheel
+        function drawWheel() {
+            const canvas = document.getElementById('wheelCanvas');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 400;
+            const sliceAngle = (Math.PI * 2) / sections.length;
+            
+            // Enable crisp rendering
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw each slice
+            sections.forEach((section, index) => {
+                const startAngle = index * sliceAngle - Math.PI / 2;
+                const endAngle = startAngle + sliceAngle;
+                
+                // Draw slice
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                ctx.closePath();
+                ctx.fillStyle = section.color;
+                ctx.fill();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 6;
+                ctx.stroke();
+                
+                // Draw text
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(startAngle + sliceAngle / 2);
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#222';
+                ctx.font = 'bold 30px sans-serif';
+                
+                // Split text if it's too long
+                const words = section.name.split(' ');
+                if (words.length > 1) {
+                    ctx.fillText(words[0], radius * 0.65, -10);
+                    ctx.fillText(words.slice(1).join(' '), radius * 0.65, 24);
+                } else {
+                    ctx.fillText(section.name, radius * 0.65, 10);
+                }
+                
+                ctx.restore();
+            });
+        }
+        
+        // Initialize wheel
+        drawWheel();
+        
+        function spinWheel() {
+            if (isSpinning) return;
+            
+            isSpinning = true;
+            const button = document.getElementById('spinButton');
+            button.disabled = true;
+            button.textContent = 'Spinning...';
+            
+            // Hide previous result
+            document.getElementById('resultBox').classList.remove('show');
+            
+            // Random number of full rotations (4-7) plus a random position
+            const spins = 4 + Math.floor(Math.random() * 4);
+            const randomDegrees = Math.floor(Math.random() * 360);
+            const totalRotation = (spins * 360) + randomDegrees;
+            
+            currentRotation += totalRotation;
+            
+            const canvas = document.getElementById('wheelCanvas');
+            canvas.style.transform = `rotate(${currentRotation}deg)`;
+            
+            // Calculate which section we landed on
+            const normalizedRotation = currentRotation % 360;
+            const adjustedRotation = (360 - normalizedRotation) % 360;
+            const sectionIndex = Math.floor(adjustedRotation / 60);
+            
+            // Show result after spin completes
+            setTimeout(() => {
+                showResult(sectionIndex);
+                button.disabled = false;
+                button.textContent = 'Spin Again';
+                isSpinning = false;
+            }, 4000);
+        }
+        
+        function showResult(index) {
+            const section = sections[index];
+            document.getElementById('resultTitle').textContent = section.name;
+            document.getElementById('resultDescription').textContent = section.description;
+            document.getElementById('resultPrompt').textContent = section.prompt;
+            document.getElementById('resultBox').classList.add('show');
+        }
+    </script>
+</body>
+</html>
